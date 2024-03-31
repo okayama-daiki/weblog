@@ -1,0 +1,48 @@
+import { useRouter } from "next/router";
+import { Cards, Card } from "nextra/components";
+import { useData } from "nextra/data";
+import crawlTags from "../../../utils/crawlTags";
+
+export const getStaticPaths = () => {
+  return crawlTags().then((tags) => {
+    return {
+      paths: Array.from(tags.keys()).map((tag) => ({
+        params: { slug: tag },
+      })),
+      fallback: false,
+    };
+  });
+};
+
+export const getStaticProps = () => {
+  return crawlTags().then((tags) => {
+    return {
+      props: {
+        ssg: {
+          tags: Object.fromEntries(tags),
+        },
+        revalidate: 60 * 60 * 24,
+      },
+    };
+  });
+};
+
+export function Entries() {
+  const router = useRouter();
+  const { slug } = router.query;
+  const { tags } = useData();
+  const entries = tags[slug] || [];
+  return (
+    <Cards>
+      {entries.map((entry) => {
+        // TODO: Use a better way to extract title
+        const title = entry.substring(10, 27);
+        return <Card title={title} href={`/${title}`} />;
+      })}
+    </Cards>
+  );
+}
+
+[← Back to Tags](/atcoder/tags)
+
+<Entries />

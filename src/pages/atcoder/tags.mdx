@@ -1,0 +1,24 @@
+import Cards from "../../components/TagCards";
+import { useData } from "nextra/data";
+import crawlTags from "../../utils/crawlTags";
+
+export const getStaticProps = () => {
+  return crawlTags().then((tags) => {
+    console.log(Array.from(tags.keys()));
+    return {
+      props: {
+        ssg: {
+          tags: Array.from(tags.keys()),
+        },
+        revalidate: 60 * 60 * 24,
+      },
+    };
+  });
+};
+
+export default function Tags() {
+  const { tags } = useData();
+  return <Cards names={tags} />;
+}
+
+<Tags />;

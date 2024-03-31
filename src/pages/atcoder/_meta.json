@@ -34,6 +34,9 @@
   "--": {
     "type": "separator"
   },
+  "tags": {
+    "title": "Tags"
+  },
   "atcoder.jp": {
     "title": "My AtCoder Profile ↗",
     "href": "https://atcoder.jp/users/saurik",
