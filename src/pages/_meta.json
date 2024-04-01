@@ -1,11 +1,14 @@
 {
   "index": {
     "type": "page",
-    "display": "hidden",
-    "theme": {}
+    "display": "hidden"
   },
   "atcoder": {
     "title": "AtCoder",
+    "type": "page"
+  },
+  "products": {
+    "title": "Products",
     "type": "page"
   }
 }
