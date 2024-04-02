@@ -4,11 +4,11 @@ import crawlTags from "../../utils/crawlTags";
 
 export const getStaticProps = () => {
   return crawlTags().then((tags) => {
-    console.log(Array.from(tags.keys()));
+    const [tag2file] = tags;
     return {
       props: {
         ssg: {
-          tags: Array.from(tags.keys()),
+          tags: Array.from(tag2file.keys()),
         },
         revalidate: 60 * 60 * 24,
       },

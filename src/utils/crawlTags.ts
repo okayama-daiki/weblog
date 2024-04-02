@@ -28,15 +28,21 @@ function extractHeader(mdText: string): Header {
   return header;
 }
 
-export default async function crawlTags() {
+const tag2file: Map<string, string[]> = new Map();
+const file2tag: Map<string, string[]> = new Map();
+
+async function crawlTags() {
+  if (tag2file.size > 0) return [tag2file, file2tag];
   const mdFiles = glob.sync("src/pages/atcoder/**/*.{md,mdx}");
-  const tags: Map<string, string[]> = new Map();
   for (const file of mdFiles) {
     const mdText = await readFile(file, "utf-8");
     const header = extractHeader(mdText);
-    header.tags.forEach((tag) =>
-      tags.set(tag, (tags.get(tag) || []).concat(file))
-    );
+    header.tags.forEach((tag) => {
+      tag2file.set(tag, (tag2file.get(tag) || []).concat(file));
+      file2tag.set(file, (file2tag.get(file) || []).concat(tag));
+    });
   }
-  return tags;
+  return [tag2file, file2tag];
 }
+
+export default crawlTags;
