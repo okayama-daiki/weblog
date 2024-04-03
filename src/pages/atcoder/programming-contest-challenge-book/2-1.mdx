@@ -1,0 +1,235 @@
+import { Callout } from "nextra/components";
+
+# 2-1 全ての基本 "全探索"
+
+## 再帰関数
+
+```python showLineNumbers
+# 再帰関数
+def fact(n: int) -> int:
+    if n == 0:
+        return 1
+    return n * fact(n - 1)
+
+```
+
+```python showLineNumbers
+# フィボナッチ数列
+def fib(n: int) -> int:
+    if n <= 1:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+```
+
+```python showLineNumbers
+# フィボナッチ数列(メモ化)
+N: int
+memo: list[int] = [0] * N
+
+
+def fib(n: int):
+    if n <= 1:
+        return n
+    if memo[n] != 0:
+        return memo[n]
+    memo[n] = fib(n - 1) + fib(n - 2)
+    return memo[n]
+
+```
+
+## スタック
+
+**L**ast **I**n **F**irst **O**ut, **LIFO**
+
+```python showLineNumbers
+class Stack[T]:
+    def __init__(self):
+        self.stack: list[T] = []
+
+    def push(self, x: T):
+        self.stack.append(x)
+
+    def pop(self) -> T:
+        return self.stack.pop()
+
+```
+
+```python copy=false
+>>> stack = Stack[int]()
+>>> stack.push(1)
+>>> stack.push(2)  # Last in, 最後に入れた要素が
+>>> stack.pop()    # First out, 最初に取り出される
+2
+>>> stack.pop()
+1
+```
+
+## キュー
+
+**F**irst **I**n **F**irst **O**ut, **FIFO**
+
+```python showLineNumbers
+class Queue[T]:
+    def __init__(self):
+        self.queue: list[T] = []
+        self.it = iter(self.queue)
+
+    def enqueue(self, x: T):
+        self.queue.append(x)
+
+    def dequeue(self) -> T:
+        return next(self.it)
+
+```
+
+```python copy=false
+>>> queue = Queue[int]()
+>>> queue.enqueue(1)  # First in, 最初に入れた要素が
+>>> queue.enqueue(2)
+>>> queue.dequeue()   # First out, 最初に取り出される
+1
+>>> queue.dequeue()
+2
+```
+
+## 深さ優先探索
+
+- 可能な限り遷移を続ける \<=\> 遷移先が無くなったら一つ前の状態に戻る
+
+```python showLineNumbers
+# 部分和問題
+
+a: list[int]
+n: int
+k: int
+
+
+def dfs(i: int, sum_: int) -> bool:
+    if i == n:
+        return sum_ == k
+    if dfs(i + 1, sum_):
+        return True
+    if dfs(i + 1, sum_ + a[i]):
+        return True
+    return False
+
+```
+
+```python showLineNumbers
+# Lake Counting
+
+N: int
+M: int
+field: list[list[str]]
+
+
+def dfs(x: int, y: int) -> None:
+    field[x][y] = "."
+    dx: int
+    dy: int
+    for dx in range(-1, 2):
+        for dy in range(-1, 2):
+            nx: int = x + dx
+            ny: int = y + dy
+            if 0 <= nx < N and 0 <= ny <= M and field[nx][ny] == "W":
+                dfs(nx, ny)
+    return
+
+
+def solve() -> None:
+    res: int = 0
+    i: int
+    j: int
+    for i in range(N):
+        for j in range(M):
+            if field[i][j] == "W":
+                dfs(i, j)
+                res += 1
+    print(res)
+
+```
+
+## 幅優先探索
+
+- はじめの状態に近い方から探索
+- 計算量は $\mathcal{O}($ 状態数 $\times$ 遷移の仕方 $)$
+
+```python showLineNumbers
+# 迷路の最短路
+from collections import deque
+
+INF: float = 2**64
+MAX_N: int
+MAX_M: int
+
+maze: list[list[str]]
+N: int
+M: int
+sx: int
+sy: int
+gx: int
+gy: int
+
+d: list[list[int]]
+dx: list[int] = [1, 0, -1, 0]
+dy: list[int] = [0, 1, 0, -1]
+
+
+def bfs() -> int:
+    que = deque()
+    for i in range(N):
+        for j in range(M):
+            d[i][j] = INF
+    que.append((sx, sy))
+    d[sx][sy] = 0
+
+    while que:
+        p = que.popleft()
+        if p == (gx, gy):
+            break
+        ...
+
+```
+
+<Callout>
+**幅優先探索と深さ優先探索の違い**
+
+- BFS
+  - 最短路を求める場合はこっち
+  - 状態数に比例するメモリを必要とする
+- DFS
+  - 記述は簡潔になる場合が多い
+  - 状態数に対して再帰は深くならないので，メモリ使用量は少ない
+
+</Callout>
+
+## 特殊な状態の列挙
+
+```python showLineNumbers
+MAX_N = 5
+
+
+used: list[int] = [0] * MAX_N
+perm: list[int] = list(range(MAX_N))
+
+
+def permutations1(pos: int, n: int) -> None:
+    if pos == n:
+        return
+    for i in range(n):
+        if not used[i]:
+            perm[pos] = i
+            used[i] = True
+            permutations1(pos + 1, n)
+            used[i] = False
+    return
+
+
+permutations1(2, 4)
+
+```
+
+## 枝刈り
+
+...

@@ -1,0 +1,153 @@
+import { Callout } from "nextra/components";
+
+# 2-2 猪突猛進！"貪欲法"
+
+<Callout>
+    **動的計画法との違い**
+
+    - 動的計画法: 考えられる遷移を全て考え
+    - 貪欲法: 1 ステップ先のことのみを考えて最善な選択を行う
+
+</Callout>
+
+## 硬貨の問題
+
+```python showLineNumbers
+# 硬貨の問題
+V: list[int] = [1, 5, 10, 50, 100, 500]
+c: list[int]
+a: int
+
+
+def solve() -> None:
+    ans = 0
+    for i in range(6)[::-1]:
+        t = min(a // V[i], c[i])
+        a -= t * V[i]
+        ans += t
+    print(ans)
+
+```
+
+### 貪欲法が最適解を導くとは限らないこと
+
+「1 ステップ先の時点では最善ではないが、将来的には最適になる選択」を切り捨てる可能性があり、常に最適解を導くとは限らない。
+
+(例) コインの単位が 1 円、4 円、5 円の場合、8 円を支払うのに最小のコインの枚数
+
+## 区間の問題
+
+- 終了順でソートするは定石（けんちょん本より）
+
+```python showLineNumbers
+# 区間スケジューリング問題
+n: int = 5
+s: list[int] = [1, 2, 4, 6, 8]
+t: list[int] = [3, 5, 7, 9, 10]
+
+
+def solve() -> None:
+    itv = list(zip(s, t))
+    itv.sort(key=lambda x: x[1])
+    ans: int = 0
+    t: int = 0
+    for i in range(n):
+        if t < int[i][1]:
+            ans += 1
+            t = itv[i][0]
+    print(ans)
+
+```
+
+## 辞書順最小の問題
+
+- 辞書順のため、先頭が辞書順最小であれば良い（後ろはどうでもいい）
+- 前と後ろを辞書順比較して小さい方の先頭を利用
+
+```python showLineNumbers
+# Best Cow Line
+n: int
+s: str
+
+
+def solve() -> None:
+    a = 0
+    b = n - 1
+    while a <= b:
+        left: bool = False
+        for i in range(b - a + 1):
+            if s[a + i] < s[b - i]:
+                left = True
+                break
+            elif s[a + i] > s[b - i]:
+                left = False
+                break
+        if left:
+            a += 1
+        else:
+            b -= 1
+            print(s[b], end="")
+    print()
+
+```
+
+```python showLineNumbers
+def solve() -> None:
+    a = 0
+    b = n - 1
+    while a <= b:
+        if s[a:] < s[:b:-1]:
+            print(s[b], end="")
+            a += 1
+        else:
+            print(s[a], end="")
+            b -= 1
+    print()
+
+```
+
+## その他の問題
+
+### Saruman's Arymy
+
+- 左から順にカバーできていない点を含むような、最も右端の点にマーキングする
+
+```python showLineNumbers
+# Saruman's Army
+
+n: int
+r: int
+x: list[int]
+
+
+def solve() -> None:
+    x.sort()
+    i: int = 0
+    ans: int = 0
+    while i < n:
+        i += 1
+        ...
+
+```
+
+### Fence Repair
+
+- 切り出し方は二分木に対応
+  - 親は二人の子の和
+- コストは葉 × 深さの総和
+- コスト最小の子を結ぶように木を構成すれば良い
+
+```python showLineNumbers
+# Fence Repair
+
+import heapq
+
+N: int
+L: int
+
+
+def solve() -> None:
+    ans: int = 0
+    que: list = heapq()
+
+```

@@ -1,0 +1,226 @@
+import { Callout } from "nextra/components";
+import Sieve from "/src/components/Shive";
+
+# 2-6 数学的な問題を解くコツ
+
+## ユークリッドの互除法
+
+### 最大公約数を求める
+
+```python showLineNumbers
+# 線分上の格子点の個数
+def gcd(a: int, b: int) -> int:
+    if b == 0:
+        return a
+    return gcd(b, a % b)
+
+```
+
+自然数 $a, b$ に対して、最大公約数を求める関数を $gcd(a,b)$ とする。  
+$a$ を $b$ で割った商と余りを $p,q$ とする。このとき、
+
+$$
+gcd(b,q)=g
+$$
+
+とすると、自然数 $k_{1},k_{2}$ を利用して、
+
+$$
+b=g\times k_{1},q=g\times k_{2}
+$$
+
+と表せ、これらを $a=p\times b+q$ に代入すると、
+
+$$
+a=p\times g\times k_{1}+g\times k_{2}=g\times(p\times k_{1}+k_{2})
+$$
+
+により、$gcd(b,q)$ は $gcd(a,b)$ を割り切る。同様にして、$gcd(a,b)$ は $gcd(b,q)$ を割り切る。よって、
+
+$$
+gcd(a,b)=gcd(b,q)=gcd(b,a\%b)
+$$
+
+が示された。
+
+### 拡張ユークリッドの互除法
+
+```python showLineNumbers
+# 双六
+def extgcd(a: int, b: int, x: int, y: int) -> int:
+    d = a
+    if b != 0:
+        d = extgcd(b, a % b, y, x)
+    else:
+        x = 1
+        y = 0
+    return d
+
+```
+
+題意は $ax+by=1$ となる整数 $x,y$ を求めることと同値である。  
+$gcd(a,b)!=1$ のとき解は存在しないため、以下 $gcd(a,b)=1$ を仮定する。
+
+$$
+bx'+(a\%b)y'=gcd(a,b)
+$$
+
+の解が求まっているとする。
+
+このとき、
+
+$$
+a\%b=a-(a/b)\times b
+$$
+
+であるからこれを代入し、$a,b$ に関して整理すると、
+
+$$
+ay'+b(x'-(a/b)\times y')=gcd(a,b)
+$$
+
+つまり、$x'\rightarrow y',y'\rightarrow x'-(a/b)y'$ を再帰的に計算することで解が求まる。
+
+## 素数に関する基本的なアルゴリズム
+
+### 素数判定
+
+```python showLineNumbers
+# 素数判定
+def is_prime(n: int) -> bool:
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+
+# 約数の列挙
+def divisor(n: int) -> list[int]:
+    res: list[int] = []
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            res.append(i)
+            if i != n // i:
+                res.append(n // i)
+    return res
+
+
+# 素因数分解
+def prime_factor(n: int) -> dict[int, int]:
+    res: dict[int, int] = {}
+    for i in range(2, int(n**0.5) + 1):
+        while n % i == 0:
+            res[i] = res.get(i, 0) + 1
+            n //= i
+    if n != 1:
+        res[n] = 1
+    return res
+
+```
+
+<Callout>関連: フェルマーテスト、Carmichael Numbers(カーマイケル数)</Callout>
+
+#### Tips: 約数の個数はそう多くない
+
+$d(k)$ を $k$ の約数の個数とすると、
+
+- $10^6$ 以下の場合: $k=720 720$ で $d(k)=240$
+- $10^9$ 以下の場合: $k=753123400$ で $d(k)=1344$
+- $10^{12}$ 以下の場合: $k=963761198400$ で $d(k)=6720$
+
+参考: https://twitter.com/e869120/status/1412541885160189952/photo/2
+
+### エラトステネスの篩
+
+```python showLineNumbers
+# 素数の個数
+
+MAX_N: int = 20
+
+prime: list[int] = [0] * MAX_N
+is_prime: list[int] = [True] * (MAX_N + 1)
+
+
+def sieve(n: int) -> int:
+    p: int = 0
+    is_prime[:2] = [False] * 2
+    for i in range(2, n + 1):
+        if is_prime[i]:
+            prime[(p := p + 1)] = i
+            for j in range(2 * i, n + 1, i):
+                is_prime[j] = False
+    return p
+
+```
+
+### 区間篩
+
+$b$ 未満の素数でない整数の最小の素因数は高々 $\sqrt{b}$ であることを利用して、$[2, \sqrt{b}$ と $[a, b)$ の 2 つの篩を同時に更新していく。
+
+```python showLineNumbers
+# 区間内の素数の個数
+
+MAX_L: int
+MAX_SQRT_B: int
+
+is_prime: list[bool] = [True] * MAX_L
+is_prime_small: list[bool] = [True] * MAX_SQRT_B
+
+
+def segment_sieve(a: int, b: int) -> None:
+    for i in range(2, int(b**0.5)):
+        if is_prime_small[i]:
+            for j in range(2 * i, int(b**0.5), i):
+                is_prime_small[j] = False
+            for j in range(max(2, a + i - 1 // i), b, i):
+                is_prime[j - a] = False
+
+```
+
+## 余りの計算
+
+### 合同式
+
+### モジュラ逆数
+
+$\frac{P}{Q}$ は、$P\times Q^{-1}$ であるから、$\frac{P}{Q}\mod{M}$ を計算するには、`P * pow(Q, -1, mod) % mod`
+
+練習問題
+
+- [ABC174 C - Respect](https://atcoder.jp/contests/abc174/tasks/abc174_c)
+
+## べき乗を高速に計算する
+
+**繰り返し二乗法**
+
+- $x^{s+t}=x^{s}\times x^{t}$ と 任意の数が 2 の冪乗和で表現出来ることを利用し、累乗を高速化するテクニック
+- 例: $x^{22}=x^{16}\times x^4 \times x^2$
+- 計算量は $O(\log n)$
+
+```python showLineNumbers
+# Carmichael Numbers
+def mod_pow(x: int, n: int, mod: int) -> int:
+    res: int = 1
+    while n > 0:
+        if n & 1:
+            res = res * x % mod
+        x = x * x % mod
+        n >>= 1
+    return res
+
+```
+
+```python showLineNumbers
+# 再帰ver
+def mod_pow(x: int, n: int, mod: int) -> int:
+    if n == 0:
+        return 1
+    return mod_pow(x * x % mod, n // 2, mod) * x**(n & 1) % mod
+
+```
+
+## 付録
+
+### エラトステネスの篩
+
+<Sieve />

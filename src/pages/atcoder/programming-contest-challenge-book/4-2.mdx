@@ -1,0 +1,214 @@
+# 4.2 ゲームの必勝法を編み出せ！
+
+## ゲームと必勝法
+
+### コインのゲーム１
+
+$j$ 枚のコインがある状態で自分の番が回ってきたとする
+
+- 最後のコインを取ったら勝ち \<=\> 0 枚のコインがある状態で自分の番が回ってきたら負け =\> $j=0$ ならば負け
+- ある $i$ ($1\le i\le k$)に対し $j-a_i$ が「負け」ならば、$j$ 枚は勝ち
+  - 負ける $a_i$ を取る => 負けるのは相手
+- 全ての $i$ に対し、$j-a_i$ が「勝ち」ならば、$j$ 枚は負け
+  - 何を取っても相手が勝つ
+
+```python showLineNumbers
+# コインのゲーム1
+
+X: int
+K: int
+A: list[int]
+
+win: list[bool]
+
+
+def solve() -> None:
+    win[0] = False
+
+    for j in range(1, X + 1):
+        win[j] = False
+        for i in range(K):
+            win[j] = win[j] or A[i] <= j and not win[j - A[i]]
+
+
+if win[X]:
+    print("Alice")
+else:
+    print("Bob")
+
+```
+
+**各状態にて勝ちや負けになる条件を考え、価値の状態と負けの状態を考える**
+
+### A Funny Game
+
+### Euclid's Game
+
+## Nim
+
+### Nim
+
+- $a_1\oplus a_2\oplus ...\oplus a_n\neq 0$: 勝ちの状態
+- $a_1\oplus a_2\oplus ...\oplus a_n=0$: 負けの状態
+
+**証明**
+
+1. $a_1\oplus a_2\oplus ...\oplus a_n=0$ の状態から一つ以上の石を取ると、必ず $a_1\oplus a_2\oplus ...\oplus a_n\neq 0$ となる。つまり負けの状態からは必ず勝ちの状態へ遷移する
+
+- 負けの状態は自力で覆すことが出来ない
+
+2. $a_1\oplus a_2\oplus ...\oplus a_n\neq 0$ の状態では、「$a_1\oplus a_2\oplus ...\oplus a_n$ の結果の最上位ビットが立っている山から、$a_1\oplus a_2\oplus ...\oplus a_n=0$ となるように取る」取り方が必ず存在し、そのように取ることで勝ちの状態から負けの状態へ遷移させる方法が存在する
+
+- 勝ちの状態から、相手に負けの状態を渡すことができる
+
+```python showLineNumbers
+# Nim
+
+N: int
+A: list[int]
+
+
+def solve() -> None:
+    x = 0
+    for i in range(N):
+        x ^= A[i]
+
+    if x != 0:
+        print("Alice")
+    else:
+        print("Bob")
+
+```
+
+### Georgia and Bob
+
+![幅寄せゲーム](https://img.animanch.com/2020/11/1606544302290.jpg)
+
+2 つずつ駒をまとめて考えることで Nim に帰着できる。
+
+- 山に含まれる石の個数は、2 つの駒の間隔である
+- 山から取る石の個数は、右側の駒を左に動かす個数に対応する
+- 左側の駒を動かした場合、石の個数が増えることになるが、その場合、次の手番が速やかに同じ数だけ右側の駒を動かすことで元の状況に帰着するため勝敗には影響しない
+- 駒の個数が奇数個の場合は、一番左の駒を 1 つの山として数える
+
+```python showLineNumbers
+# Georgia and Bob
+
+MAX_N: int = 1000
+
+N: int
+P: list[int]
+
+
+def solve() -> None:
+    if N % 2 == 1:
+        P[n := n + 1] = 0
+    P.sort()
+
+    x = 0
+    for i in range(0, N, 2):
+        x ^= P[i + 1] - P[i] - 1
+
+    if x == 0:
+        print("Bob will win")
+    else:
+        print("Georgia will win")
+
+```
+
+## Grundy 数
+
+### コインのゲーム２
+
+例えば 1 つの山から $a_1,a_2,...,a_k$ のいずれかの枚数分のコインを取ることを考える。今、山に $x$ 枚のコインがあるとき、Grundy 数は次のようにして求める。
+
+$a = \{1, 2, 4\}$, $x=5$ のとき、この場面の Grundy 数は次のようにして求まる。
+
+$MEX(S)$: 最小除外集合($S$に含まれない最小の非負整数)
+
+$$
+\begin{aligned}
+Grundy(5) &= MEX(\{Grundy(4), Grundy(3), Grundy(1)\})\\
+Grundy(4) &= MEX(\{Grundy(3), Grundy(2), Grundy(0)\})\\
+Grundy(3) &= MEX(\{Grundy(2), Grundy(1)\})\\
+Grundy(2) &= MEX(\{Grundy(1), Grundy(0)\})\\
+Grundy(1) &= MEX(\{Grundy(0)\})\\
+Grundy(0) &= MEX(\{\}) = 0\\
+\\
+Grundy(1) &= MEX(\{0\}) = 1\\
+Grundy(2) &= MEX(\{1, 0\}) = 2\\
+Grundy(3) &= MEX(\{2, 1\}) = 0\\
+Grundy(4) &= MEX(\{0, 2, 0\}) = 1\\
+Grundy(5) &= MEX(\{1, 0, 1\}) = 2\\
+\end{aligned}
+$$
+
+課題: $a=\{1,3,4\}, x=7$ において $Grundy(7)$ を求めよ。
+
+Nim で $x$ 枚コインがある山は、コインが $0,1,...,x-1$ 枚の状態へ遷移可能であったように、Grundy 数が $x$ の状態からは、Grundy 数が $0,1,...,x-1$ である状態へ遷移が可能である。ただし、Grundy 数は $x$ より大きな状態へ遷移することがあるというのが Nim とは異なる点である。
+
+ただし、相手に増やされれば、速やかに次の手番が増やされた分だけ減らすことで元の状態に戻すことが出来るため問題にはならない。
+
+さて、Nim では全山の石の個数の排他的論理和が $0$ になるか否かで勝敗を判定したが、Grundy 数が Nim の石の数に対応するため、Nim のときと同様にして、
+
+- $Grundy(x_1)\oplus Grundy(x_2)\oplus ...\oplus Grundy(x_n)\neq 0$: 勝ちの状態
+- $Grundy(x_1)\oplus Grundy(x_2)\oplus ...\oplus Grundy(x_n)=0$: 負けの状態
+
+ということになる。
+
+---
+
+MEMO
+
+1. Grundy 数が増えた場合、元の Grundy 数に戻るような遷移は存在するのか疑問。蟻本では、必ず存在ような書き方がされている
+2. Grundy 数が Nim 数と（ほぼ）同じ性質を持つため、Nim と同じように排他的論理和を利用して勝敗の判定ができるということ？
+3. Grundy 数の性質として
+   - Grundy 数が 0 なら負け
+   - Grundy 数が 1 なら勝ち
+   - Grundy 数が 2 以上の場合はゲームによっては勝利判定が複雑になる
+
+---
+
+```python showLineNumbers
+# コインのゲーム2
+
+N: int
+K: int
+X: list[int]
+A: list[int]
+
+grundy: list[int]
+
+
+def solve() -> None:
+    grundy[0] = 0
+
+    max_x = max(X)
+
+    for j in range(1, max_x):
+        s: set[int] = set()
+        for i in range(K):
+            if A[i] <= j:
+                s.add(grundy[j - A[i]])
+
+        g = 0
+        while g in s:
+            g += 1
+        grundy[j] = g
+
+    x = 0
+    for i in range(N):
+        x ^= grundy[X[i]]
+
+    if x != 0:
+        print("Alice")
+    else:
+        print("Bob")
+
+```
+
+### Cutting Game
+
+```python
+# Cutting Game
+```
