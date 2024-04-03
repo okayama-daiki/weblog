@@ -8,12 +8,12 @@ tags: [Hash, ABC, E]
 水色上位。
 
 前処理により、一致判定を $O(1)$ で行う手法を考える。
-このような prefix の要素集合が一致しているかであったり、prefix そのものが一致しているかという問題は、まともにやると $O(prefixの長さ)$ の処理であるが、これを hash を利用して $O(1)$ にする。
+このような prefix の要素集合が一致しているかであったり、prefix そのものが一致しているかという問題は、まともにやると $O($ prefix の長さ $)$ の処理であるが、これを hash を利用して $O(1)$ にする。
 
 具体的には $O(N)$ の前処理をもって、先頭から任意のインデックスまでの要素の集合を hash として計算する。
 後はクエリに答えるのみである。
 
-類題：[ABC287 E - Karuta](ABC287 E - Karuta)
+## 提出コード
 
 ```py
 n = int(input())
@@ -48,3 +48,7 @@ for _ in range(q):
         print('No')
 
 ```
+
+## 類題
+
+- [ABC287 E - Karuta](https://atcoder.jp/contests/abc287/tasks/abc287_e)
