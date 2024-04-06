@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "d3-graphviz": "^5.3.0",
     "next": "^14.1.4",
     "nextra": "^2.13.4",
     "nextra-theme-docs": "^2.13.4",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@nextui-org/react": "^2.2.10",
     "@progfay/scrapbox-parser": "^9.0.0",
+    "@types/d3-graphviz": "^2.6.10",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
