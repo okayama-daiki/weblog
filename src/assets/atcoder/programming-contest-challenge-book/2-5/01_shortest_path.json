@@ -1,0 +1,4 @@
+[
+  "graph {\n\trankdir=LR\n\tA [pos=\"0,0!\"]\n\tB [pos=\"1,0.1!\"]\n\tC [pos=\"0,-1!\"]\n\tD [pos=\"1.2,-1.1!\"]\n\tE [pos=\"2,0.1!\"]\n\tF [pos=\"2.3,-0.9!\"]\n\tG [pos=\"3.2,-0.2!\"]\n\tA -- B [label=2]\n\tA -- C [label=5]\n\tB -- C [label=4]\n\tB -- D [label=6]\n\tB -- E [label=10]\n\tC -- D [label=2]\n\tD -- F [label=1]\n\tE -- F [label=3]\n\tE -- G [label=5]\n\tF -- G [label=9]\n}",
+  "graph {\n\trankdir=LR\n\tA [pos=\"0,0!\"]\n\tB [pos=\"1,0.1!\"]\n\tC [pos=\"0,-1!\"]\n\tD [pos=\"1.2,-1.1!\"]\n\tE [pos=\"2,0.1!\"]\n\tF [pos=\"2.3,-0.9!\"]\n\tG [pos=\"3.2,-0.2!\"]\n\tA -- B [label=2]\n\tA -- C [label=5 color=red style=bold]\n\tB -- C [label=4]\n\tB -- D [label=6]\n\tB -- E [label=10]\n\tC -- D [label=2 color=red style=bold]\n\tD -- F [label=1 color=red style=bold]\n\tE -- F [label=3 color=red style=bold]\n\tE -- G [label=5 color=red style=bold]\n\tF -- G [label=9]\n}"
+]
