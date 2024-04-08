@@ -1,0 +1,337 @@
+# 動的計画法を極める
+
+## ビット DP
+
+参考資料：https://www.slideshare.net/hcpc_hokudai/advanced-dp-2016
+
+### 巡回セールスマン問題
+
+- 閉路であればどこからスタートしてもよいので、始点と終点を 0 に固定して考える
+
+$$
+\begin{aligned}
+    dp[S][v] &:= \text{現在 }v\text{ にいる状態から、残りの頂点集合 }V\setminus{S}\text{ の}\\
+    &\text{全ての頂点を巡って頂点 }0\text{ に帰るようなパスの重みの最小値} \\
+    dp[V][0] &= 0 \\
+    dp[S][v] &= \min\{dp[S\cup \{u\}]+d(v,u)\space|\space u\notin S\} \\
+\end{aligned}
+$$
+
+```python showLineNumbers
+# 巡回セールスマン問題
+
+import functools
+
+INF = 2**64
+n: int
+d: list[list[int]]
+
+
+@functools.cache()
+def dp(s, v) -> int:
+    if s == (1 << n) - 1 and v == 0:
+        return 0
+    res = INF
+    for u in range(n):
+        if s >> u & 1 == 0:
+            res = min(res, dp(s | 1 << u, u) + d[v][u])
+    return res
+
+
+def solve() -> None:
+    print(dp(0, 0))
+
+```
+
+```python copy=false
+>>> n = 5
+>>> d = [
+...     [INF, 3, INF, 4, INF],
+...     [INF, INF, 5, INF, INF],
+...     [4, INF, INF, 5, INF],
+...     [INF, INF, INF, INF, 4],
+...     [7, 6, INF, INF, INF],
+... ]
+>>> solve()
+23
+```
+
+### Traveling by Stagecoach
+
+- 「状態」を頂点、「状態遷移」を辺とするグラフを考える
+- 状態：都市 $v$ にいて、残っている乗車券の集合が $S$ である
+- 遷移：乗車券 $i\in S$ を用いて、一本の道路で結ばれた都市 $u$ に移動する
+  - この時のコストは、$u-v$ の距離 / $t_{i}$
+
+```python showLineNumbers
+# Traveling by Stagecoach
+
+...
+```
+
+### ドミノ敷き詰め
+
+- 境界が同じならその後の詰め方は同じ
+  - 境界をビット列で管理すればよい
+- $i,j$ を考える時に、自分より左のものは既に埋まっていると考える
+
+$$
+\begin{aligned}
+    dp[i][j][S] &:= i\text{ 行 }j\text{ 列まで埋めて、境界が }S\text{ となるパターン数} \\
+    dp[i][j+1][S|(1<<(j+1))] &+= dp[i][j][S] (\text{縦置き}) \\
+    dp[i][j+1][S|(1<<j)] &+= dp[i][j][S] (\text{横置き}) \\
+    dp[i][j+1][S\&~(1<<j)] &+= dp[i][j][S] (i,j\text{ が既に埋まっている})
+\end{aligned}
+$$
+
+```python showLineNumbers
+# ドミノ敷き詰め
+
+...
+```
+
+### 練習問題
+
+- [EDPC O - Matching](https://atcoder.jp/contests/dp/tasks/dp_o)
+
+## 行列累乗
+
+### フィボナッチ数列
+
+$$
+\left(
+\begin{matrix}
+F_{n+2} \\
+F_{n+1}
+\end{matrix}
+\right)=
+\left(
+\begin{matrix}
+1 & 1 \\
+1 & 0
+\end{matrix}
+\right)
+\left(
+\begin{matrix}
+F_{n+1} \\
+F_{n}
+\end{matrix}
+\right)
+$$
+
+$A=\left(\begin{matrix}1 & 1 \\1 & 0\end{matrix}\right)$ とすると、
+
+$$
+\left(
+\begin{matrix}
+F_{n+1} \\
+F_{n}
+\end{matrix}
+\right)=
+A^{n}
+\left(
+\begin{matrix}
+F_{1} \\
+F_{0}
+\end{matrix}
+\right)=
+A^{n}
+\left(
+\begin{matrix}
+1 \\
+0
+\end{matrix}
+\right)
+$$
+
+```python showLineNumbers
+# フィボナッチ数列
+
+import numpy as np
+
+n: int
+
+
+def solve() -> None:
+    a = np.array(
+        [
+            [1, 1],
+            [1, 0],
+        ]
+    )
+    A = (np.linalg.matrix_power(a, n) @ np.array([[1], [0]]))[1][0] % 10**4
+    print(A)
+
+```
+
+```python
+>>> n = 10
+>>> solve()
+55
+```
+
+一般の $m$ 項間漸化式の場合、漸化式を
+
+$$
+a_{n+m}=\sum_{i=0}^{m-1}b_{i}a_{n+i}
+$$
+
+とすると、行列を用いて
+
+$$
+\left(
+\begin{matrix}
+a_{n+m} \\
+a_{n+m-1} \\
+\vdots \\
+a_{n+1}
+\end{matrix}
+\right)=
+\left(
+\begin{matrix}
+b_{m-1} & \cdots & b_{1} & b_{0} \\
+1 & \cdots & 0 & 0 \\
+\vdots & \ddots & \vdots & \vdots \\
+0 & \cdots & 1 & 0
+\end{matrix}
+\right)
+\left(
+\begin{matrix}
+a_{n+m-1} \\
+a_{n+m-2} \\
+\vdots \\
+a_{n}
+\end{matrix}
+\right)
+$$
+
+と表せる。漸化式に定数項がある場合は、
+
+$$
+\left(
+\begin{matrix}
+a_{n+m} \\
+a_{n+m-1} \\
+\vdots \\
+a_{n+1} \\
+1
+\end{matrix}
+\right)=
+\left(
+\begin{matrix}
+b_{m-1} & \cdots & b_{1} & b_{0} & c \\
+1 & \cdots & 0 & 0 & 0 \\
+\vdots & \ddots & \vdots & \vdots & \vdots \\
+0 & \cdots & 1 & 0 & 0 \\
+0 & \cdots & 0 & 0 & 1
+\end{matrix}
+\right)
+\left(
+\begin{matrix}
+a_{n+m-1} \\
+a_{n+m-2} \\
+\vdots \\
+a_{n} \\
+1
+\end{matrix}
+\right)
+$$
+
+となる。
+
+### Blocks
+
+左から順に塗る。$i$ 個目までを、
+
+- <span style={{ color: "red" }}>赤</span>・
+  <span style={{ color: "green" }}>緑</span>ともに偶数個になるように塗る総数を
+  $a_{i}$
+- <span style={{ color: "red" }}>赤</span>・
+  <span style={{ color: "green" }}>緑</span>
+  の片方のみが奇数個となるように塗る総数を $b_{i}$
+- <span style={{ color: "red" }}>赤</span>・
+  <span style={{ color: "green" }}>緑</span>ともに奇数個になるように塗る総数を
+  $c_{i}$
+
+とすると、$i+1$ 個目までを<span style={{color: "red"}}>赤</span>・<span style={{color: "green"}}>緑</span>ともに奇数個となるように塗るには、
+
+- $i$ 個目までを<span style={{color: "red"}}>赤</span>・<span style={{color: "green"}}>緑</span>ともに奇数個になるように塗った上で、$i+1$ 個目を<span style={{color: "blue"}}>青</span>もしくは<span style={{color: "yellow"}}>黄色</span>で塗る
+- $i$ 個目までを<span style={{color: "red"}}>赤</span>・<span style={{color: "green"}}>緑</span>の片方が奇数個となるように塗った上で、$i+1$ 個目を<span style={{color: "red"}}>赤</span>・<span style={{color: "green"}}>緑</span>のうち奇数個の方で塗る
+
+の 2 通りがあり、
+
+$$
+a_{i+1}=2\times a_{i}+b_{i}
+$$
+
+が成り立つ。同様にして、
+
+$$
+b_{i+1}=2\times a_{i}+2\times b_{i}+2\times c_{i}
+$$
+
+$$
+c_{i+1}=b_{i}+2\times c_{i}
+$$
+
+も成り立つ。
+
+```python showLineNumbers
+# Blocks
+
+import numpy as np
+
+n: int
+
+
+def solve() -> None:
+    a = np.array(
+        [
+            [2, 1, 0],
+            [2, 2, 2],
+            [0, 1, 2],
+        ]
+    )
+    A = np.linalg.matrix_power(a, n)[0][0] % 10**4
+    print(A)
+
+```
+
+```python copy=false
+>>> n = 1
+>>> solve()
+2
+>>> n = 2
+>>> solve()
+6
+```
+
+### グラフの長さ $k$ のパスの列挙
+
+- $i-k$ パスの個数と $k-j$ パスの個数を掛け合わせると、$i-j$ パスの個数となる
+
+$$
+G_{k_1+k_2}[u][v]=\sum_{w=1}^{n} G_{k_1}[u][w]\times G_{k_2}[w][v]
+$$
+
+- 上式は行列の積の定義そのもの
+
+```python showLineNumbers
+# グラフの長さkのパスの個数
+
+...
+```
+
+#### Matrix Power Series
+
+```python showLineNumbers
+# Matrix Power Series
+
+...
+```
+
+## データ構造を用いて高速化
+
+```python showLineNumbers
+...
+```
