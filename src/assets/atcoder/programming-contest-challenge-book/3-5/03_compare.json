@@ -1,0 +1,4 @@
+[
+  "digraph {\n\trankdir=LR\n\ts [pos=\"-1,1.5!\"]\n\t1 [pos=\"1,3!\"]\n\t2 [pos=\"1.5,0!\"]\n\t3 [pos=\"3,2!\"]\n\tt [pos=\"4,.5!\"]\n\ts -> 1 [label=0]\n\ts -> 2 [label=1]\n\t1 -> 2 [label=-1]\n\t1 -> 3 [label=1]\n\t2 -> t [label=0]\n\t3 -> 2 [label=0]\n\t3 -> t [label=1]\n}\n",
+  "digraph {\n\trankdir=LR\n\ts [pos=\"-1,1.5!\"]\n\t1 [pos=\"1,3!\"]\n\t2 [pos=\"1.5,0!\"]\n\t3 [pos=\"3,2!\"]\n\tt [pos=\"4,.5!\"]\n\ts -> 1 [label=0]\n\ts -> 2 [label=1 color=red]\n\t1 -> 2 [label=-1]\n\t2 -> 1 [label=1 color=red]\n\t1 -> 3 [label=1 color=red]\n\t2 -> t [label=0]\n\t3 -> 2 [label=0]\n\t3 -> t [label=1 color=red]\n}\n"
+]
