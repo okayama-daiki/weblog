@@ -7,10 +7,12 @@ import {
   LinearScale,
   PointElement,
   Point,
+  CategoryScale,
+  ScatterController,
 } from "chart.js";
 import { Chart } from "react-chartjs-2";
 
-ChartJs.register(LinearScale, PointElement);
+ChartJs.register(LinearScale, CategoryScale, PointElement, ScatterController);
 ChartJs.defaults.backgroundColor = "#eee";
 ChartJs.defaults.color = "darkgrey";
 ChartJs.defaults.borderColor = "darkgrey";
