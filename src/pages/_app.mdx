@@ -7,8 +7,12 @@ export default function App({ Component, pageProps }) {
   return (
     <NextUIProvider>
       <Component {...pageProps} />
-      <Analytics />
-      <SpeedInsights />
+      {process.env.NODE_ENV == "production" && (
+        <>
+          <Analytics />
+          <SpeedInsights />
+        </>
+      )}
     </NextUIProvider>
   );
 }
