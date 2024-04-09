@@ -6,6 +6,7 @@ import {
   ChartOptions,
   LinearScale,
   PointElement,
+  Point,
 } from "chart.js";
 import { Chart } from "react-chartjs-2";
 
@@ -154,7 +155,7 @@ export function Fliptile({ m, n }: { m: number; n: number }) {
 function compress(data: number[]): Map<number, number> {
   const compressed: Map<number, number> = new Map();
   const unique = new Set([...data].sort((a, b) => a - b));
-  const values = [...unique];
+  const values = Array.from(unique);
   for (let i = 0; i < values.length; i++) {
     compressed.set(values[i], i);
   }
@@ -192,10 +193,10 @@ export function Compress({ w, h, n }: { w: number; h: number; n: number }) {
 
   const update = () => {
     for (let i = 0; i < n; i++) {
-      data.current.datasets[0].data[i].x = isCompressedX.current
+      (data.current.datasets[0].data[i] as Point).x = isCompressedX.current
         ? (compressed_x.current.get(rawData.current[i][0]) as number)
         : rawData.current[i][0];
-      data.current.datasets[0].data[i].y = isCompressedY.current
+      (data.current.datasets[0].data[i] as Point).y = isCompressedY.current
         ? (compressed_y.current.get(rawData.current[i][1]) as number)
         : rawData.current[i][1];
     }
