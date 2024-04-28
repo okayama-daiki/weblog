@@ -7,6 +7,10 @@
     "title": "AtCoder",
     "type": "page"
   },
+  "til": {
+    "title": "TIL",
+    "type": "page"
+  },
   "products": {
     "title": "Products",
     "type": "page"
