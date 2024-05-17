@@ -1,0 +1,37 @@
+# 値レシーバの注意点
+
+値レシーバであっても、フィールドがポインタであれば、コピーされた値が指し示すのは元のインスタンスのフィールドと同じであることに注意する。
+
+```go filename="main.go" showLineNumbers
+package main
+
+import "fmt"
+
+type Struct struct {
+	Data []int
+}
+
+func (m Struct) Get() Struct {
+	return m
+}
+
+func main() {
+	s1 := Struct{[]int{1}}
+	s2 := s1.Get()
+	fmt.Println(s1)
+	fmt.Println(s2)
+
+	s2.Data[0] = 2
+	fmt.Println(s1)
+	fmt.Println(s2)
+}
+
+```
+
+```sh
+$ go run main.go
+{[1]}
+{[1]}
+{[1]}
+{[2]}
+```

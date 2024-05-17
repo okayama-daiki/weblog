@@ -1,0 +1,79 @@
+# Functional Option パターンを使ったオプション引数
+
+Golang (^1.22) には関数の引数にデフォルト値を設定できない。オプション引数を実現する代替的な方法として、Functional Option パターンが存在する。
+
+実用 Go には実装例があるので、折角なので慣れ親しんだ Python[^1] で書いてみる。
+
+[^1]: Python にはオプション引数があるので、実用上これを使う理由はない。
+
+```py filename="src/functional_option.py"
+# Implementing Functional Option Pattern
+
+import dataclasses
+import typing as t
+
+type OptFunc = t.Callable[[Option], None]
+
+
+@dataclasses.dataclass
+class Option:
+    field1: int
+    field2: bool
+
+
+def opt_field1(field1: int) -> OptFunc:
+    def inner(opt: Option):
+        opt.field1 = field1
+
+    return inner
+
+
+def opt_field2() -> OptFunc:
+    def inner(opt: Option):
+        opt.field2 = True
+
+    return inner
+
+
+def new_option(*options: OptFunc) -> Option:
+    opt = Option(0, False)  # default values
+    for option in options:
+        option(opt)
+    return opt
+
+
+if __name__ == "__main__":
+    option = new_option(
+        opt_field1(10),
+        opt_field2(),
+    )  # optionally set field1 and field2
+    print(option)
+
+```
+
+## Pros
+
+- 利用者が独自のオプションを作成しやすい
+
+  ```py
+  def my_opt() -> OptFunc:
+      def inner(opt: Option):
+          opt.field1 = 30
+          opt.field2 = True
+      return inner
+
+  option = new_option(my_opt())
+  ```
+
+## Cons
+
+- 外部から利用する場合、毎回パッケージ名を書く必要がある（これは Golang 特有かも）
+
+  ```py filename="main.py"
+  from src import functional_option
+
+  option = functional_option.new_option(
+      functional_option.opt_field1(10),
+      functional_option.opt_field2(),
+  )
+  ```
