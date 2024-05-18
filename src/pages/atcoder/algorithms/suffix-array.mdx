@@ -1,0 +1,73 @@
+# Suffix Array
+
+[Suffix Array](https://en.wikipedia.org/wiki/Suffix_array) とは、ある文字列の全ての接尾辞を辞書順に並び替えたもの[^1]である。
+
+## 構築
+
+貪欲に構築した場合、入力文字列 $S$ の長さを $|S|$ したとき 1 回の比較で $O(|S|)$ 時間がかかるため、比較ソートを利用すると $O(|S|^2 \log |S|)$ 時間がかかる。
+
+```py showLineNumbers
+def suffix_array(s: str) -> list[int]:
+    """
+    Construct a suffix array of a given string `s`.
+
+    >>> assert(suffix_array("abcde") == [0, 1, 2, 3, 4])
+    >>> assert(suffix_array("abracadabra") == [10, 7, 0, 3, 5, 8, 1, 4, 6, 9, 2])
+    """
+    return sorted(range(len(s)), key=lambda i: s[i:])
+
+```
+
+他方で SA-IS[^2] のような $O(n)$ 時間の構築アルゴリズムが知られており、既に [AC Library](https://atcoder.github.io/ac-library/production/document_en/string.html) にて実装されている[^3]。
+
+```py showLineNumbers
+def suffix_array(s: str) -> list[int]:
+    # TODO: Implement SA-IS
+    ...
+```
+
+[^1]: とはいえ接尾辞として部分文字列そのものを配列に格納すると $O(|S|^2)$ のメモリを必要とするため、実際には部分文字列の開始位置を保存するようである
+[^2]: G. Nong, S. Zhang, and W. H. Chan, Two Efficient Algorithms for Linear Time Suffix Array Construction, IEEE Transactions on Computers 60(10):1471 - 1484, 2011.
+[^3]: https://github.com/atcoder/ac-library/blob/d8ca7f26686f6c78d15d13ca438ea866526e87fb/atcoder/string.hpp#L51-L54
+
+## 利用例
+
+### パターンマッチング
+
+事前に構築した入力文字列 $S$ の Suffix Array を用いて、ある文字列 $T$ が $S$ に含まれるかどうかが $O(|T| \log |S|)$ 時間で判定できる。
+
+Suffix Array に含まれるある要素 $i$ に対応する接尾辞 $S[i:]$ の先頭が $T$ と一致すれば、$T$ が $S$ に含まれることが分かる。
+ある文字列 $T$ との辞書順比較は $O(|T|)$ で行えるため、Suffix Array 上で二分探索を行うと、$O(|T| \log |S|)$ 時間でパターンマッチングを行うことができる。
+
+```py showLineNumbers
+import bisect
+
+from atcoder.string import suffix_array
+
+
+def make_matcher(s: str):
+    """
+    Construct a function that checks if a given string is a substring of `s`.
+
+    >>> match = make_matcher("abracadabra")
+    >>> assert(match("abr"))
+    >>> assert(match("racada"))
+    >>> assert(not match("dabrx"))
+    """
+    sa = suffix_array(s)
+
+    def match(t: str) -> bool:
+        """
+        Check if `t` is a substring of `s`.
+        """
+        lo = bisect.bisect_left(sa, t, key=lambda i: s[i : i + len(t)])
+        return lo < len(sa) and s[sa[lo] : sa[lo] + len(t)] == t
+
+    return match
+
+```
+
+- `bisect.bisect_left()` に与える `key` 引数にて、Suffix Array の要素を対応する接尾辞に変換している
+  - 新しい文字列オブジェクトを生成するオーバーヘッドを考慮すれば、自前で二分探索と文字列の比較関数を実装した方が幾分か効率的かもしれない
+
+---
