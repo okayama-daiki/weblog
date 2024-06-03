@@ -22,7 +22,7 @@
     "sharp": "^0.33.4"
   },
   "devDependencies": {
-    "@nextui-org/react": "^2.3.6",
+    "@nextui-org/react": "^2.4.1",
     "@progfay/scrapbox-parser": "^9.0.0",
     "@types/d3-graphviz": "^2.6.10",
     "@types/node": "^20",
