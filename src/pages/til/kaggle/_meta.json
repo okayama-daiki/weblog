@@ -1,5 +1,11 @@
 {
   "evaluation": {
     "title": "評価指標"
+  },
+  "numeric-variable-conversion": {
+    "title": "数値変数の変換"
+  },
+  "categorical-variable-conversion": {
+    "title": "カテゴリ変数の変換"
   }
 }
