@@ -1,5 +1,18 @@
 # 3.11 次元削減・教師なし学習による特徴量
 
+| 手法名                             | 目的             | 備考                                                                                                                                                                           |
+| ---------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 主成分分析 (PCA)                   | 次元削減         | 変数間の従属性が高ければ、より少数の主成分で元データを表現できる                                                                                                               |
+| 非負値行列因子分解 (NMF)           | 次元削減         | 非負データにしか使えないが、非負ベクトルの和の形で表現できる                                                                                                                   |
+| Latent Dirichlet Allocation（LDA） | 次元削減         | 自然言語処理において、単語文書のカウント行列に対して、各文書のトピック分類を行う手法                                                                                           |
+| 線形判別分析 (LDA)                 | 次元削減         | 分類タスクにおいて教師ありでで時限削減を行う手法                                                                                                                               |
+| t-SNE                              | 次元削減／可視化 | 元の特徴量空間上にて、近い点が圧縮後の平面でも近くなるように圧縮できる。**非線形な関係を捉えることもできるため、元の特徴量にこれらの圧縮結果を加えて精度が上がることがある。** |
+| UMAP                               | 次元削減         | t-SNE に比べ数分の 1 程度高速、高次元への圧縮も可能                                                                                                                            |
+| オートエンコーダ                   | 次元削減         | ニューラルネットを用いる                                                                                                                                                       |
+| K-Means                            | クラスタリング   |                                                                                                                                                                                |
+| DBSCAN                             | クラスタリング   |                                                                                                                                                                                |
+| Agglomerative Clustering           | クラスタリング   |                                                                                                                                                                                |
+
 ## なぜ次元削減が必要か？
 
 - 学習コストの低下
@@ -183,13 +196,214 @@ $$
 
 同様にして、$\partial{\mathcal{L}}/\partial{\lambda{}} = 0$ 解いて得られる $\boldsymbol{v}_j^T\boldsymbol{v}_j = 1$ は、正規直交基底の条件そのものである。
 
-## 3.11.2 非負値行列因子分解 (NMF)
+## 3.11.2 非負値行列因子分解 (NMF) [^nmf]
+
+[^nmf]: Lee, Daniel & Seung, Hyunjune. (2001). Algorithms for Non-negative Matrix Factorization. Adv. Neural Inform. Process. Syst.. 13.
+
+[Keywords]
+
+- イェンセンの不等式
+- 補助関数法
+
+---
 
 非負行列を２つの非負行列の積で表現する手法。
 
 ![NMF](./assets/nmf.png)
 
-Frobenius norm (ユークリッドノルム、L2 ノルムとも) を最小化する問題として定式化される。
+なぜ非負にこだわるのかというと、[東京大学の資料](http://hil.t.u-tokyo.ac.jp/~kameoka/SAP/SAP13_06.pdf) によれば、
+
+- 実世界には非負値データが多いこと
+- 係数行列をスパースに誘導することができ、その結果基底行列の情報量が増える
+
+とのこと。
+
+$$
+\boldsymbol{Y} \approx{} \boldsymbol{H}\boldsymbol{U}
+$$
+
+ただし、$\boldsymbol{Y}\in\R_{+}^{N,K}, \boldsymbol{H}\in\R_{+}^{K,M}, \boldsymbol{U}\in\R_{+}^{M,N}$であり、$\boldsymbol{H}$ を基底行列、$\boldsymbol{U}$ を係数行列という。
+
+$$
+\begin{aligned}
+  \text{min}  & \quad{} D(\boldsymbol{H},\boldsymbol{U}) = \sum_{i=1}^{N}\sum_{j=1}^{K}\left(y_{i,j} - \sum_{k=1}^{M}h_{i,k}u_{k,j}\right)^2\\
+  \text{s.t.} & \quad{} h_{i,k} \ge 0 \qquad{} i=1,\ldots{},N,k=1,\ldots{},M \\
+              & \quad{} u_{k,j} \ge 0 \qquad{} k=1,\ldots{},M,j=1,\ldots{},K \\
+\end{aligned}
+$$
+
+目的関数を展開すると、
+
+$$
+\begin{aligned}
+  D(\boldsymbol{H},\boldsymbol{U}) = & \sum_{i=1}^{N}\sum_{j=1}^{K}\left(y_{i,j} - \sum_{k=1}^{M}h_{i,k}u_{k,j}\right)^2 \\
+  =& \sum_{i=1}^{N}\sum_{j=1}^{K} \left( y_{i,j}^2 - 2y_{i,j}\sum_{k=1}^{M}h_{i,k}u_{k,j} + \left(\sum_{k=1}^{M}h_{i,k}u_{k,j}\right)^2 \right)
+\end{aligned}
+$$
+
+---
+
+（補足）$D(\boldsymbol{H},\boldsymbol{U})$ の展開をさらに進めると、
+
+$$
+\begin{aligned}
+  & \sum_{i=1}^{N}\sum_{j=1}^{K} \left( y_{i,j}^2 - 2y_{i,j}\sum_{k=1}^{M}h_{i,k}u_{k,j} + \left(\sum_{k=1}^{M}h_{i,k}u_{k,j}\right)^2 \right) \\
+  =& \sum_{i=1}^{N}\sum_{j=1}^{K} \left( y_{i,j}^2 - 2y_{i,j}\sum_{k=1}^{M}h_{i,k}u_{k,j} + \sum_{k=1}^{M}h_{i,k}^2u_{k,j}^2 + 2\sum_{k\neq{}l}h_{i,k}u_{k,j}h_{i,l}u_{l,j} \right) \\
+\end{aligned}
+$$
+
+のように、$h_{i,k}v_{k,j}$ に関する項が増え、解析的に解を求めることが困難になる。
+
+---
+
+ここで、$\sum_{k=1}^{M}\lambda{}_{i,j,k}=1$ の下で $\lambda{}_{i,j,k} > 0$ を導入すると、イェンセンの不等式から、
+
+$$
+\begin{aligned}
+  & \sum_{i=1}^{N}\sum_{j=1}^{K} \left( y_{i,j}^2 - 2y_{i,j}\sum_{k=1}^{M}h_{i,k}u_{k,j} + \left(\sum_{k=1}^{M}h_{i,k}u_{k,j}\right)^2 \right) \\
+
+  =& \sum_{i=1}^{N}\sum_{j=1}^{K} \left( y_{i,j}^2 - 2y_{i,j}\sum_{k=1}^{M}h_{i,k}u_{k,j} + \left(\sum_{k=1}^{M} \lambda{}_{i,j,k} \frac{h_{i,k}u_{k,j}}{\lambda{}_{i,j,k}}\right)^2 \right) \\
+
+  \le& \sum_{i=1}^{N}\sum_{j=1}^{K} \left( y_{i,j}^2 - 2y_{i,j}\sum_{k=1}^{M}h_{i,k}u_{k,j} + \sum_{k=1}^{M}\lambda{}_{i,j,k}\left(\frac{h_{i,k}u_{k,j}}{\lambda{}_{i,j,k}}\right)^2 \right) \\
+
+  =& \sum_{i=1}^{N}\sum_{j=1}^{K} \left( y_{i,j}^2 - 2y_{i,j}\sum_{k=1}^{M}h_{i,k}u_{k,j} + \sum_{k=1}^{M}\frac{h_{i,k}^2u_{k,j}^2}{\lambda{}_{i,j,k}} \right)\\
+\end{aligned}
+$$
+
+と目的関数の上限となる関数が得られ、これを $\boldsymbol{\lambda{}} = \{\lambda{}_{i,j,k}\}_{N\times{}K\times{}M}$ を用いて $G(\boldsymbol{H}, \boldsymbol{U}, \boldsymbol{\lambda{}})$ とおく。等号は、$\frac{h_{i,1}u_{1,j}}{\lambda{}_{i,j,1}} = \frac{h_{i,2}u_{2,j}}{\lambda{}_{i,j,2}} = \cdots{} = \frac{h_{i,M}u_{M,j}}{\lambda{}_{i,j,M}}$ のとき成り立つ。
+
+これにより、補助関数法に従えば、
+
+$$
+\begin{aligned}
+  \boldsymbol{\lambda{}} &\leftarrow{} \underset{\boldsymbol{\boldsymbol{\lambda{}}}}{\argmin{}}G(\boldsymbol{H}, \boldsymbol{U}, \boldsymbol{\lambda{}}) \\
+  \boldsymbol{H} &\leftarrow{} \underset{\boldsymbol{H}}{\argmin{}}G(\boldsymbol{H}, \boldsymbol{U}, \boldsymbol{\lambda{}}) \\
+  \boldsymbol{U} &\leftarrow{} \underset{\boldsymbol{U}}{\argmin{}}G(\boldsymbol{H}, \boldsymbol{U}, \boldsymbol{\lambda{}})
+\end{aligned}
+$$
+
+を繰り返し行うことで、目的関数 $D(\boldsymbol{H},\boldsymbol{U})$ の値を最小化できるということである。
+
+まず、イェンセンの不等式の等号成立条件 $\frac{h_{i,1}u_{1,j}}{\lambda{}_{i,j,1}} = \frac{h_{i,2}u_{2,j}}{\lambda{}_{i,j,2}} = \cdots{} = \frac{h_{i,M}u_{M,j}}{\lambda{}_{i,j,M}}$ から、
+
+$$
+\begin{aligned}
+  \lambda{}_{i,j,1} &= \frac{h_{i,1}u_{1,j}}{h_{i,1}u_{1,j}}\lambda{}_{i,j,1} \\
+  \lambda{}_{i,j,2} &= \frac{h_{i,2}u_{2,j}}{h_{i,1}u_{1,j}}\lambda{}_{i,j,1} \\
+  \vdots{} \\
+  \lambda{}_{i,j,M} &= \frac{h_{i,M}u_{M,j}}{h_{i,1}u_{1,j}}\lambda{}_{i,j,1} \\
+\end{aligned}
+$$
+
+が得られ、$\sum_{k=1}^{M}\lambda{}_{i,j,k}=1$ に代入すると、
+
+$$
+\frac{h_{i,1}u_{1,j}}{h_{i,1}u_{1,j}}\lambda{}_{i,j,1}+ \frac{h_{i,2}u_{2,j}}{h_{i,1}u_{1,j}}\lambda{}_{i,j,1} + \cdots{}+ \frac{h_{i,M}u_{M,j}}{h_{i,1}u_{1,j}}\lambda{}_{i,j,1} = 1
+$$
+
+から、
+
+$$
+\lambda{}_{i,j,1} = \frac{h_{i,1}u_{1,j}}{\sum_{k=1}^{M}{h_{i,k}v_{k,j}}}
+$$
+
+が得られる。$\lambda{}_{i,j,2},\ldots{},\lambda{}_{i,j,M}$ らについても同様に計算すると、
+
+$$
+\lambda{}_{i,j,k} = \frac{h_{i,k}u_{k,j}}{\sum_{k'=1}^{M}{h_{i,k'}v_{k',j}}}
+$$
+
+として関数 $G(\boldsymbol{H}, \boldsymbol{U}, \boldsymbol{\lambda{}})$ の最小の値を与える $\boldsymbol{\lambda{}}$ が計算できた。
+
+次に、$G(\boldsymbol{H}, \boldsymbol{U}, \boldsymbol{\lambda{}})$ は、次式のように行列 $\boldsymbol{H}$ の各要素 $h_{i,k}$ ごとに分離できる。各 $h_{i,k}$ について整理すると、
+
+$$
+G(\boldsymbol{H},\boldsymbol{U},\boldsymbol{\lambda{}}) = \sum_{i=1}^{N}\sum_{j=1}^{K}y_{i,j}^2 + \sum_{i=1}^{N}\sum_{k=1}^{M}\left( \left( \sum_{j=1}^{K}-2y_{i,j}v_{k,j} \right) h_{i,k} + \left( \sum_{j=1}^{K} \frac{u_{k,j}^2}{\lambda{}_{i,j,k}} \right) h_{i,k}^2 \right)
+$$
+
+のように、$h_{i,k}$ ごとに独立な二次関数の和の形で表現できるので、それぞれの $h_{i,k}$ を個別に最小化することで式全体を最小化できる。式の値を最小化する各 $\hat{h}_{i,k}$ は、
+
+$$
+\hat{h}_{i,k} = \frac{\sum_{j=1}^{K} y_{i,j}v_{k,j}}{\sum_{j=1}^{K} \frac{u_{k,j}^2}{\lambda{}_{i,j,k}}}
+$$
+
+であり、同様にして行列 $\boldsymbol{U}$ の各要素 $u_{k,j}$ に対しても $G(\boldsymbol{H},\boldsymbol{U},\boldsymbol{\lambda{}})$ を最小化する $\hat{u}_{k,j}$ も、
+
+$$
+\hat{u}_{k,j} = \frac{\sum_{i=1}^{N} y_{i,j}h_{i,k}}{\sum_{i=1}^{N} \frac{h_{i,k}^2}{\lambda{}_{i,j,k}}}
+$$
+
+のように求まる。
+
+各行列要素の値の更新を繰り返すことで、目的関数 $D(\boldsymbol{H},\boldsymbol{U})$ の値を単調減少させることができる。
+
+### イェンセンの不等式 (Jensen's inequality)
+
+任意の凸関数 $g$、$I$ 個の実数 $x_1,\ldots{},x_I$、$\sum_{i=1}^{I}{\lambda{}_i}=1$ を満たす $I$ 個の正値の重み係数 $\lambda{}_1,\ldots{},\lambda{}_I$ のもとで、
+
+$$
+g\left(\sum_{i=1}^{I}{\lambda{}_i x_{i}}\right) \le \sum_{i=1}^{I}{\lambda_{i}g(x_i)}
+$$
+
+が成り立つ。等号は $x_1=x_2=\cdots{}=x_I$ のとき成立する。
+
+(証明) $I=2$ のとき、不等式は凸関数の性質そのものである。$I=k$ のとき、不等式が成り立つと仮定して、$I=k+1$ のとき、
+
+$$
+g\left(\sum_{i=1}^{k+1}{\lambda{}_i x_{i}}\right) \le \sum_{i=1}^{k+1}{\lambda_{i}g(x_i)}
+$$
+
+となることを示したい。
+
+問題の仮定より、$\sum_{i=1}^{k+1}{\lambda{}_i}=1$ である。ここで、$\sum_{i=1}^{k}{\frac{\lambda{}_i}{1-\lambda_{k+1}}}=1$ であることと、帰納法の仮定から、
+
+$$
+g\left(\sum_{i=1}^{k}{\frac{\lambda{}_i}{1-\lambda_{k+1}} x_{i}}\right) \le \sum_{i=1}^{k}{\frac{\lambda_{i}}{1-\lambda_{k+1}}g(x_i)} \tag{1}
+$$
+
+が得られる。
+
+さらに、$(1-\lambda_{k+1})+\lambda_{k+1}=1$ と凸関数の性質から、
+
+$$
+\begin{aligned}
+g\left((1-\lambda_{k+1}) \left(\sum_{i=1}^{k}{\frac{\lambda{}_i}{1-\lambda_{k+1}}}x_i \right) + \lambda_{k+1}x_{k+1}  \right) &\le (1-\lambda_{k+1})g\left(\sum_{i=1}^{k}{\frac{\lambda{}_i}{1-\lambda_{k+1}}}x_i\right) + \lambda_{k+1}g(x_{k+1}) \\
+\end{aligned}
+$$
+
+であり、右辺は $(1)$ より、
+
+$$
+\begin{aligned}
+  (1-\lambda_{k+1})g\left(\sum_{i=1}^{k}{\frac{\lambda{}_i}{1-\lambda_{k+1}}}x_i\right) + \lambda_{k+1}g(x_{k+1}) &\le (1-\lambda{}_{k+1})\sum_{i=1}^{k}{\frac{\lambda_{i}}{1-\lambda_{k+1}}g(x_i)} + \lambda{}_{k+1}g(x_{k+1}) \\
+    &= \sum_{i=1}^{k+1}{\lambda{}_ig(x_i)}
+\end{aligned}
+$$
+
+によって題意の不等式が示された。
+
+### 補助関数法
+
+目的関数が非線形であるといった理由等で解の探索が困難な場合、目的関数の上限となる補助関数を反復的に降下させることで目的関数を間接的に降下させることができる。
+
+$\theta{}=\{\theta{}_i\}_{1\le{i}\le{I}}$ を変量とする目的関数 $D(\theta{})$ に対し、
+
+$$
+D(\theta{}) = \underset{{\bar{\theta{}}}}{\min{}}G(\theta{}, \bar{\theta{}})
+$$
+
+が成り立つとき、$G(\theta{}, \bar{\theta{}})$ を $D(\theta{})$ を補助関数、$\bar{\theta{}}$ を補助変数という。
+
+補助関数 $G(\theta{},\bar{\theta{}})$ を、$\bar{\theta{}}$ に関して最小化するステップと、$\theta_{1},\ldots{},\theta_{I}$ に関して最小化するステップ
+
+$$
+\begin{aligned}
+  \bar{\theta} &\leftarrow{} \underset{\bar{\theta{}}}{\argmin{}}{G(\theta{}, \bar{\theta{}})} \\
+  \theta{}_i &\leftarrow{} \underset{\theta{}_i}{\argmin{}}{G(\theta{},\bar{\theta{}})}
+\end{aligned}
+$$
+
+を繰り返すと、目的関数 $D(\theta{})$ の値は単調減少する。
 
 ## 3.11.3 Latent Dirichlet Allocation (LDA)
 
@@ -198,6 +412,8 @@ Frobenius norm (ユークリッドノルム、L2 ノルムとも) を最小化�
 分類タスクについて教師ありで次元削減を行う手法。
 
 ## 3.11.5 t-SNE、UMAP
+
+元の空間での点同士の近さが、圧縮後の空間での点同士の近さと出来るだけ同じになるように圧縮する手法。
 
 ### SNE
 
@@ -219,8 +435,6 @@ $$
 ### t-distributed Stochastic Neighbor Embedding (t 分布型確率的近傍埋め込み)
 
 <https://jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf>
-
-元の空間での点同士の近さが、圧縮後の空間での点同士の近さと出来るだけ同じになるように圧縮する手法。
 
 ## 3.11.6 オートエンコーダ
 
