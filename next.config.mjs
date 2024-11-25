@@ -46,6 +46,9 @@ const withNextra = nextra({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  images: {
+    dangerouslyAllowSVG: true,
+  },
 };
 
 export default withNextra(nextConfig);

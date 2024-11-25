@@ -1,11 +1,11 @@
-import { Cards, Card } from "nextra/components";
+import { Cards } from "nextra/components";
 
 function TagCard({ name }: { name: string }) {
   return (
     <div>
-      <Card icon={<></>} title={name} href={`/atcoder/tags/${name}`}>
+      <Cards.Card icon={<></>} title={name} href={`/atcoder/tags/${name}`}>
         <></>
-      </Card>
+      </Cards.Card>
     </div>
   );
 }

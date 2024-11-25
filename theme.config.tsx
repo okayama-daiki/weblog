@@ -8,7 +8,7 @@ const config: DocsThemeConfig = {
   docsRepositoryBase: "https://github.com/okayama-daiki/weblog/tree/main",
   banner: {
     key: "banner",
-    text: "🚧 This website is under construction. 🚧",
+    content: "🚧 This website is under construction. 🚧",
   },
   toc: {
     backToTop: true,
@@ -19,7 +19,7 @@ const config: DocsThemeConfig = {
   navigation: false,
   gitTimestamp: null,
   footer: {
-    text: (
+    content: (
       <span>
         MIT {new Date().getFullYear()} ©{" "}
         <a href="https://daiki.dev" target="_blank">

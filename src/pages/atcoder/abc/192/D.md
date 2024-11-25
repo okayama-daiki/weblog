@@ -7,7 +7,7 @@ tags: [二分探索, 基数変換, ABC, D]
 [https://atcoder.jp/contests/abc192/tasks/abc192_d](https://atcoder.jp/contests/abc192/tasks/abc192_d)  
 水色
 
-$X$ を $n$ 進法表記とみなした数は狭義単調増加となる。よって $0～m$ の間で二分探索を行えばよい。
+$X$ を $n$ 進法表記とみなした数は狭義単調増加となる。よって $0\sim m$ の間で二分探索を行えばよい。
 
 二分探索とは False, False, False, ..., False, True, True, .., True, の境界点を求めることである。
 境界点を $M$ とすると、
