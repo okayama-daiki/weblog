@@ -232,7 +232,7 @@ def show_table_transition(flame: int):
 
 $$
 \begin{aligned}
-    dp[i][j] &:= i番目までの品物から、重さの総和がj以下になるように選んだときの価値の総和の最大値 \\
+    dp[i][j] &:= i \text{番目までの品物から、重さの総和が} j \text{以下になるように選んだときの価値の総和の最大値} \\
     dp[0][j] &= 0\\
     dp[i+1][j+1] &= \max ({dp[i][j-k \times w[i]]+k\times v[i] | 0\leqq k})
 \end{aligned}
@@ -322,7 +322,7 @@ def show_table_transition(flame: int) -> None:
 
 $$
 \begin{aligned}
-    dp[i][j] &:= i番目までの品物から、価値の総和がjとなるように選んだときの重さの総和の最小値 \\
+    dp[i][j] &:= i \text{番目までの品物から、価値の総和が} j \text{となるように選んだときの重さの総和の最小値} \\
     dp[0][j] &= \infty (j > 0)\\
     dp[0][0] &= 0 \\
 dp[i+1][j+1] &= \min(dp[i][j], dp[i-v[i]]+w[i]) \\
@@ -337,8 +337,8 @@ $$
 
 $$
 \begin{aligned}
-    dp[i][j] &:= i番目まででjが作れるか \\
-    dp[i][j] &= any(\{dp[i][j-k\times a_{i}] | 0\le k\le m_{i}かつk\times a_{i}\le j\})
+    dp[i][j] &:= i \text{番目までで} j \text{が作れるか} \\
+    dp[i][j] &= any(\{dp[i][j-k\times a_{i}] | 0\le k\le m_{i} \text{かつ} k\times a_{i}\le j\})
 \end{aligned}
 $$
 
@@ -386,11 +386,11 @@ def show_table_transition(flame: int) -> None:
 
 $$
 \begin{aligned}
-    dp[i][j] &:= i番目まででjを作る際に余る最大のi番目の個数（作れない場合は-1）\\
+    dp[i][j] &:= i \text{番目までで} j \text{を作る際に余る最大の} i \text{番目の個数 (作れない場合は-1)}\\
     dp[i+1][j] &= \begin{cases}
                       m_{i} (dp[i][j] \ge 0)\\
-                      -1 (j<a_{i}またはdp[i+1][j-a_{i}]\leqq 0)\\
-                      dp[i+1][j-a_{i}]-1 (それ以外)\\
+                      -1 (j<a_{i} \text{または} dp[i+1][j-a_{i}]\leqq 0)\\
+                      dp[i+1][j-a_{i}]-1 \text{(それ以外)}\\
                   \end{cases}
 \end{aligned}
 $$
@@ -443,8 +443,8 @@ def show_table_transition(flame: int) -> None:
 
 $$
 \begin{aligned}
-    dp[i] &:= 最後がa_{i}であるような最長の増加部分列の長さ\\
-    dp[i] &= \max\{1, dp[j]+1|j<iかつa_{j}<a_{i}\}\\
+    dp[i] &:= \text{最後が} a_{i} \text{であるような最長の増加部分列の長さ} \\
+    dp[i] &= \max\{1, dp[j]+1|j<i \text{かつ} a_{j}<a_{i}\}\\
 \end{aligned}
 $$
 
@@ -482,7 +482,7 @@ def show_table_transition(flame: int) -> None:
 
 $$
 \begin{aligned}
-    dp[i][j] &:= jのi分割の総数 \\
+    dp[i][j] &:= j \text{の} i \text{分割の総数} \\
     dp[i][0] &= 0 \\
     dp[0][0] &= 1 \\
     dp[i][j] &= dp[i-1][j]+dp[i][j-i]
@@ -526,7 +526,7 @@ def dp(i, j):
 
 $$
 \begin{aligned}
-    dp[i][j] &:= i番目までの品物からj個選ぶ組み合わせの総数 \\
+    dp[i][j] &:= i \text{番目までの品物から} j \text{個選ぶ組み合わせの総数} \\
     dp[i][0] &= 0 \\
     dp[i+1][j] &= \sum_{k=0}^{\min(j,a[i])}dp[i][j-k] \\
 
@@ -598,7 +598,7 @@ def show_table_transition(flame: int) -> None:
 
 $$
 \begin{aligned}
-    dp[i][j] &:= i番目までの品物からj個選ぶ組み合わせの総数 \\
+    dp[i][j] &:= i \text{番目までの品物から}j \text{個選ぶ組み合わせの総数} \\
     dp[i][0] &= 1 \\
     dp[i+1][j] &= \sum_{k=0}^{\min(j,a[i])}dp[i][j-k] \\
              &= \sum_{k=0}^{\min(j-1,a[i])}dp[i][j-1-k]+dp[i][j]-dp[i][j-1-a_{i}] \\

@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
-import { Cards, Card } from "nextra/components";
-import { useData } from "nextra/data";
+import { Cards } from "nextra/components";
+import { useData } from "nextra/hooks";
 import crawlTags from "../../../utils/crawlTags";
 
 export const getStaticPaths = () => {
@@ -9,7 +9,7 @@ export const getStaticPaths = () => {
     return {
       paths: Array.from(tag2file.keys()).map((tag) => ({
         params: { slug: tag },
-      })),
+      })).concat({ params: { slug: "index" } }),
       fallback: false,
     };
   });
@@ -29,22 +29,56 @@ export const getStaticProps = () => {
   });
 };
 
+export function convertABCPathToTitle(path) {
+  const [_, contest, problem, alphabet] = path.split("/");
+  return `${contest.toUpperCase()}${problem} ${alphabet}`;
+}
+
 export function Entries() {
   const router = useRouter();
   const { slug } = router.query;
   const { tags } = useData();
+  if (slug == "index") {
+    return (
+      <>
+        <Cards>
+          {Object.keys(tags).map((tag) => (
+            <Cards.Card
+              title={tag}
+              href={`/atcoder/tags/${tag}`}
+              key={tag}
+            />
+          ))}
+          </Cards>
+      </>
+    );
+  }
   const entries = tags[slug] || [];
   return (
-    <Cards>
-      {entries.map((entry) => {
-        // TODO: Use a better way to extract title
-        const title = entry.substring(10, 27);
-        return <Card title={title} href={`/${title}`} />;
-      })}
-    </Cards>
-  );
-}
+    <>
+      <h2 >
+        <b>{slug}</b> の記事一覧
+      </h2>
 
-[← Back to Tags](/atcoder/tags)
+      <Cards>
+        {entries.map((entry) => {
+          // TODO: Use a better way to extract title
+          const title = entry.substring(10, 27);
+          return (
+            <Cards.Card
+              title={convertABCPathToTitle(title)}
+              href={`/${title}`}
+              key={title}
+            />
+          );
+        })}
+      </Cards>
+      <Cards>
+        <Cards.Card title={"タグ一覧"} href="/atcoder/tags/index"></Cards.Card>
+      </Cards>
+    </>
+
+);
+}
 
 <Entries />
