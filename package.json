@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@nextui-org/react": "^2.6.5",
-    "@progfay/scrapbox-parser": "^9.1.5",
+    "@progfay/scrapbox-parser": "^9.2.0",
     "@types/d3-graphviz": "^2.6.10",
     "@types/node": "^22",
     "@types/react": "^18",
