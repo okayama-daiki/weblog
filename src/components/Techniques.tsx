@@ -168,7 +168,7 @@ export function Compress({ w, h, n }: { w: number; h: number; n: number }) {
   const isCompressedX = useRef(false);
   const isCompressedY = useRef(false);
 
-  const chartRef = useRef<ChartJs>();
+  const chartRef = useRef<ChartJs>(null);
   const rawData = useRef<number[][]>(
     Array(n)
       .fill(0)
