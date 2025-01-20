@@ -34,7 +34,7 @@
     "eslint-config-next": "15.1.4",
     "framer-motion": "^11.17.0",
     "glob": "^11.0.1",
-    "postcss": "^8.4.49",
+    "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
   }
