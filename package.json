@@ -19,7 +19,7 @@
     "react": "^18.3.1",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^18.3.1",
-    "sharp": "^0.33.5"
+    "sharp": "^0.34.2"
   },
   "devDependencies": {
     "@nextui-org/react": "^2.6.11",
