@@ -1,30 +1,24 @@
 ---
-title: Dimensionality Reduction and Unsupervised Learning
+title: Famous Dimensionality Reduction Methods
 date: 2024-06-21
-description: 次元削減と教師なし学習の手法を紹介し、なぜ次元削減が必要なのかを解説します。
-tags: [machine-learning, unsupervised-learning, dimensionality-reduction]
+description: 代表的な次元削減手法である主成分分析 (PCA) と非負値行列因子分解 (NMF) について解説します。
+tags: [machine-learning, dimensionality-reduction]
 author: Daiki Okayama
 ---
 
-| 手法名                             | 目的             | 備考                                                                                                                                                                           |
-| ---------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 主成分分析 (PCA)                   | 次元削減         | 変数間の従属性が高ければ、より少数の主成分で元データを表現できる                                                                                                               |
-| 非負値行列因子分解 (NMF)           | 次元削減         | 非負データにしか使えないが、非負ベクトルの和の形で表現できる                                                                                                                   |
-| Latent Dirichlet Allocation（LDA） | 次元削減         | 自然言語処理において、単語文書のカウント行列に対して、各文書のトピック分類を行う手法                                                                                           |
-| 線形判別分析 (LDA)                 | 次元削減         | 分類タスクにおいて教師ありでで時限削減を行う手法                                                                                                                               |
-| t-SNE                              | 次元削減／可視化 | 元の特徴量空間上にて、近い点が圧縮後の平面でも近くなるように圧縮できる。**非線形な関係を捉えることもできるため、元の特徴量にこれらの圧縮結果を加えて精度が上がることがある。** |
-| UMAP                               | 次元削減         | t-SNE に比べ数分の 1 程度高速、高次元への圧縮も可能                                                                                                                            |
-| オートエンコーダ                   | 次元削減         | ニューラルネットを用いる                                                                                                                                                       |
-| K-Means                            | クラスタリング   |                                                                                                                                                                                |
-| DBSCAN                             | クラスタリング   |                                                                                                                                                                                |
-| Agglomerative Clustering           | クラスタリング   |                                                                                                                                                                                |
+## 手法のまとめ
+
+| 手法名                                              | 特徴                                                             |
+| --------------------------------------------------- | ---------------------------------------------------------------- |
+| [主成分分析 (PCA)](#主成分分析-pca)                 | 変数間の従属性が高ければ、より少数の主成分で元データを表現できる |
+| [非負値行列因子分解 (NMF)](#非負値行列因子分解-nmf) | 非負データにしか使えないが、非負ベクトルの和の形で表現できる     |
 
 ## なぜ次元削減が必要か？
 
 - 学習コストの低下
 - 可視化性能の向上
 
-## 3.11.1 主成分分析 (PCA)
+## 主成分分析 (PCA)
 
 [Questions]
 
@@ -202,9 +196,9 @@ $$
 
 同様にして、$\partial{\mathcal{L}}/\partial{\lambda{}} = 0$ 解いて得られる $\boldsymbol{v}_j^T\boldsymbol{v}_j = 1$ は、正規直交基底の条件そのものである。
 
-## 3.11.2 非負値行列因子分解 (NMF) [^nmf]
+## 非負値行列因子分解 (NMF)
 
-[^nmf]: Lee, Daniel & Seung, Hyunjune. (2001). Algorithms for Non-negative Matrix Factorization. Adv. Neural Inform. Process. Syst.. 13.
+参考: Lee, Daniel & Seung, Hyunjune. (2001). Algorithms for Non-negative Matrix Factorization. Adv. Neural Inform. Process. Syst.. 13.
 
 [Keywords]
 
@@ -410,43 +404,3 @@ $$
 $$
 
 を繰り返すと、目的関数 $D(\theta{})$ の値は単調減少する。
-
-## 3.11.3 Latent Dirichlet Allocation (LDA)
-
-## 3.11.4 線形判別分析 (LDA, Linear Discriminant Analysis)
-
-分類タスクについて教師ありで次元削減を行う手法。
-
-## 3.11.5 t-SNE、UMAP
-
-元の空間での点同士の近さが、圧縮後の空間での点同士の近さと出来るだけ同じになるように圧縮する手法。
-
-### SNE
-
-データ点 $x_i,x_j$ の類似度を、「$x_j$ は $x_i$ **を中心とした正規分布に基づいて確率的に選択されると仮定した上で**、$x_i$ が与えられた時に、近傍として $x_j$ として選択する条件付き確率」と定義する。
-
-$$
-\begin{aligned}
-P(j|i) = \frac{\exp{-||x_i-x_j||^2/2\sigma_i^2}}{\sum_{k\neq{}i}{\exp{-||x_i-x_k||^2/2\sigma_i^2}}}
-
-\end{aligned}
-$$
-
-(参考) 正規分布の確率密度関数
-
-$$
-f(x|\mu, \sigma) = \frac{1}{\sigma\sqrt{2\pi}}\exp{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}
-$$
-
-### t-distributed Stochastic Neighbor Embedding (t 分布型確率的近傍埋め込み)
-
-<https://jmlr.org/papers/volume9/vandermaaten08a/vandermaaten08a.pdf>
-
-## 3.11.6 オートエンコーダ
-
-入力と同じものを出力するようにトレーニングされたニューラルネットワークを用いる手法。
-
-## 3.11.7 クラスタリング
-
-$$
-$$
